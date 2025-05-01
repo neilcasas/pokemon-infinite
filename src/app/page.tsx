@@ -7,8 +7,12 @@ export default async function Home() {
   console.log(pokemons);
   return (
     <>
-      {pokemons && <PokemonContainer pokemons={pokemons} />}
-      <LoadMore />
+      {pokemons && (
+        <>
+          <PokemonContainer pokemons={pokemons} />
+          <LoadMore />
+        </>
+      )}
     </>
   );
 }

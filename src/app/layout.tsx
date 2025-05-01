@@ -31,7 +31,7 @@ export default function RootLayout({
           "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center flex flex-col py-10",
         )}
       >
-        <h1 className="text-5xl font-bold mb-20">PokeDex</h1>
+        <h1 className="text-5xl font-bold mb-10">PokeDex</h1>
         {children}
       </body>
     </html>

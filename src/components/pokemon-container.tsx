@@ -9,7 +9,7 @@ export const PokemonContainer = ({
   return (
     <>
       {pokemons ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-5">
           {pokemons.map((pokemon) => (
             <PokemonCard key={pokemon.id} {...pokemon} />
           ))}
