@@ -9,7 +9,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "./ui/badge";
+import { TypeBadge } from "./type-badge";
 import { Pokemon } from "@/lib/types";
 
 const MotionCard = motion.create(Card);
@@ -35,11 +35,9 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
           <CardDescription className="flex flex-col items-center justify-center">
             <p>ID:{paddedId}</p>
             <div className="flex gap-2 mt-2">
-              {types.map(
-                (t: { type: { name: string; url: string } }, index: number) => (
-                  <Badge key={index}>{t.type.name}</Badge>
-                ),
-              )}
+              {types.map((t: { type: { name: string } }, index: number) => (
+                <TypeBadge key={index} type={t.type.name} />
+              ))}
             </div>
           </CardDescription>
         </CardFooter>
