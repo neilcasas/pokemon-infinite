@@ -28,9 +28,10 @@ export default function RootLayout({
       <body
         className={cn(
           `${geistSans.variable} ${geistMono.variable} antialiased`,
-          "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center flex flex-col"
+          "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center flex flex-col py-10",
         )}
       >
+        <h1 className="text-5xl font-bold mb-20">PokeDex</h1>
         {children}
       </body>
     </html>
