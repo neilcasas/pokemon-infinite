@@ -15,6 +15,9 @@ export const LoadMore = () => {
 
   const [ref, inView] = useInView();
 
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   useEffect(() => {
     if (inView) {
       console.log("spinner in view");
@@ -23,6 +26,7 @@ export const LoadMore = () => {
   }, [inView]);
 
   const loadMorePokemon = async () => {
+    await delay(2000);
     const newOffset = offset + 10;
     const newPokemons = (await fetchPokemonBatch(newOffset)) ?? [];
     setPokemon((prev: Pokemon[]) => [...prev, ...newPokemons]);
