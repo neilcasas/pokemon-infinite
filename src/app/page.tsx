@@ -1,6 +1,6 @@
 import { fetchPokemonBatch } from "@/lib/api";
 import { PokemonContainer } from "@/components/pokemon-container";
-import { Spinner } from "@/components/spinner";
+import { LoadMore } from "@/components/load-more";
 
 export default async function Home() {
   const pokemons = await fetchPokemonBatch();
@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <>
       {pokemons && <PokemonContainer pokemons={pokemons} />}
-      <Spinner />
+      <LoadMore />
     </>
   );
 }
