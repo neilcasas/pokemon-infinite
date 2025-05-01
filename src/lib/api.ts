@@ -1,10 +1,16 @@
 import { Pokemon } from "./types";
 
-export async function fetchPokemonBatch(offset?: number): Promise<Pokemon[]> {
+export async function fetchPokemonBatch(
+  offset?: number,
+): Promise<Pokemon[] | null> {
   const initialRes = await fetch(
     `https://pokeapi.co/api/v2/pokemon?limit=10&offset=${offset ? offset : 0}`,
   );
-  if (!initialRes.ok) throw new Error("Failed to fetch Pokémon");
+
+  if (!initialRes.ok) {
+    console.log("Failed to fetch pokemon");
+    return null;
+  }
 
   const data = await initialRes.json();
 

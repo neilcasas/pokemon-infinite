@@ -1,14 +1,8 @@
-import { PokemonCard } from "@/components/pokemon-card";
 import { fetchPokemonBatch } from "@/lib/api";
+import { PokemonContainer } from "@/components/pokemon-container";
 
 export default async function Home() {
   const pokemons = await fetchPokemonBatch();
   console.log(pokemons);
-  return (
-    <div className="flex gap-4">
-      {pokemons.map((pokemon) => (
-        <PokemonCard key={pokemon.id} {...pokemon} />
-      ))}
-    </div>
-  );
+  return <>{pokemons && <PokemonContainer pokemons={pokemons} />}</>;
 }
