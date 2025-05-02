@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -10,6 +10,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { TypeBadge } from "./type-badge";
 import { Pokemon } from "@/lib/types";
 import { X } from "lucide-react";
@@ -30,30 +31,63 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
-  const paddedId = id.toString().padStart(3, "0");
+  const [currentPokemonId, setCurrentPokemonId] = useState(id);
+  const [currentPokemon, setCurrentPokemon] = useState({ id, name, image });
 
-  // Handle card click to open modal and fetch data
+  const paddedId = currentPokemon.id.toString().padStart(3, "0");
+
+  useEffect(() => {
+    if (isModalOpen) {
+      fetchPokemonDetails(currentPokemonId);
+    }
+  }, [currentPokemonId, isModalOpen]);
+
   const handleCardClick = async () => {
     setIsModalOpen(true);
+    setCurrentPokemonId(id);
+    setCurrentPokemon({ id, name, image });
+  };
 
-    if (!pokemonDetails) {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${id}/`
-        );
+  // Handle navigation to previous Pokemon
+  const handlePrevious = () => {
+    if (currentPokemonId > 1) {
+      setIsLoading(true);
+      setCurrentPokemonId(currentPokemonId - 1);
+    }
+  };
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch Pokémon details");
-        }
+  const handleNext = () => {
+    setIsLoading(true);
+    setCurrentPokemonId(currentPokemonId + 1);
+  };
 
-        const data = await response.json();
-        setPokemonDetails(data);
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchPokemonDetails = async (pokemonId: number) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${pokemonId}/`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch Pokémon details");
       }
+
+      const data = await response.json();
+      setPokemonDetails(data);
+
+      const formattedId = data.id.toString().padStart(3, "0");
+      const imageUrl = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${formattedId}.png`;
+
+      setCurrentPokemon({
+        id: data.id,
+        name: data.name,
+        image: imageUrl,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      setPokemonDetails(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,7 +121,6 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
         </CardContent>
       </MotionCard>
 
-      {/*TODO: Add weaknesses */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -97,9 +130,10 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
+              onClick={() => setIsModalOpen(false)}
             />
             <motion.div
-              className="z-50 w-full max-w-md rounded-lg bg-background p-6 shadow-lg"
+              className="z-50 w-full max-w-md rounded-lg bg-background p-6 shadow-lg relative"
               initial={{ opacity: 0, y: 100, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -100, filter: "blur(10px)" }}
@@ -107,7 +141,7 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold capitalize">
-                  {name}{" "}
+                  {currentPokemon.name}{" "}
                   <span className="text-muted-foreground text-sm">
                     #{paddedId}
                   </span>
@@ -122,14 +156,14 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
 
               {isLoading ? (
                 <div className="flex justify-center items-center py-8">
-                  <div className="h-[200px] w-[200px] flex items-center justify-center"></div>
+                  <div className="h-12 w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
                 </div>
               ) : pokemonDetails ? (
                 <div className="space-y-4">
                   <div className="relative h-[200px] w-full">
                     <Image
-                      src={image}
-                      alt={name}
+                      src={currentPokemon.image}
+                      alt={currentPokemon.name}
                       className="object-contain mx-auto"
                       width={200}
                       height={200}
@@ -152,12 +186,26 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium mb-1">Types:</p>
+                    <p className="text-sm font-medium mb-1">Types</p>
                     <div className="flex flex-wrap gap-2">
                       {pokemonDetails.types.map((type, i) => (
                         <TypeBadge key={i} type={type.type.name} />
                       ))}
                     </div>
+                  </div>
+
+                  <div className="flex justify-between pt-4 border-t border-border">
+                    <Button
+                      onClick={handlePrevious}
+                      disabled={currentPokemonId <= 1}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Previous
+                    </Button>
+                    <Button onClick={handleNext} variant="outline" size="sm">
+                      Next
+                    </Button>
                   </div>
                 </div>
               ) : (
