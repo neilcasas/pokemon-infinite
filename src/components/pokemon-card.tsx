@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { TypeBadge } from "./type-badge";
 import { Pokemon } from "@/lib/types";
 import { X } from "lucide-react";
+import { getPokemonWeaknesses } from "@/lib/utils";
 
 const MotionCard = motion.create(Card);
 
@@ -190,6 +191,17 @@ export const PokemonCard = ({ id, name, image, types }: Pokemon) => {
                     <div className="flex flex-wrap gap-2">
                       {pokemonDetails.types.map((type, i) => (
                         <TypeBadge key={i} type={type.type.name} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium mb-1">Weaknesses</p>
+                    <div className="flex flex-wrap gap-2">
+                      {getPokemonWeaknesses(
+                        pokemonDetails.types.map((t) => t.type.name)
+                      ).map((weakness, i) => (
+                        <TypeBadge key={i} type={weakness} />
                       ))}
                     </div>
                   </div>
