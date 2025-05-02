@@ -1,18 +1,27 @@
-import { fetchPokemonBatch } from "@/lib/api";
-import { PokemonContainer } from "@/components/pokemon-container";
-import { LoadMore } from "@/components/load-more";
+"use client";
 
-export default async function Home() {
-  const pokemons = await fetchPokemonBatch();
-  console.log(pokemons);
+import { Suspense } from "react";
+import { PokemonList } from "@/components/pokemon-list";
+import { Spinner } from "@/components/spinner";
+import { FilterToolbar } from "@/components/filter-toolbar";
+import { useFilterStore } from "@/lib/store";
+
+export default function Home() {
+  const { searchQuery, selectedType, sortOrder } = useFilterStore();
+
   return (
     <>
-      {pokemons && (
-        <>
-          <PokemonContainer pokemons={pokemons} />
-          <LoadMore />
-        </>
-      )}
+      <Suspense
+        key={`${searchQuery}-${selectedType}-${sortOrder}`}
+        fallback={
+          <div className="w-full h-96 flex items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
+        <PokemonList />
+      </Suspense>
+      <FilterToolbar />
     </>
   );
 }
