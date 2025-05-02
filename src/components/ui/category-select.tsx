@@ -43,10 +43,8 @@ export function CategorySelect({
     setIsOpen(false);
   };
 
-  // Close dropdown when clicking outside
   useClickAway(ref, () => setIsOpen(false));
 
-  // Close dropdown when pressing escape
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
@@ -61,7 +59,6 @@ export function CategorySelect({
 
   return (
     <div ref={ref} className={cn("relative w-full", className)}>
-      {/* Select Trigger Button - Fixed Width */}
       <button
         type="button"
         onClick={toggleDropdown}
@@ -87,7 +84,6 @@ export function CategorySelect({
         />
       </button>
 
-      {/* Dropdown Panel - Absolutely positioned to not affect layout */}
       {isOpen && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-input bg-popover shadow-md">
           <div role="listbox" className="p-1">
