@@ -1,18 +1,34 @@
 import { Pokemon } from "./types";
 
-export async function fetchPokemonBatch(
-  offset: number = 0,
-  limit: number = 10
-): Promise<Pokemon[] | null> {
+export interface PokemonQueryParams {
+  offset?: number;
+  limit?: number;
+  search?: string;
+  type?: string;
+  sort?: string;
+}
+
+export async function fetchPokemonBatch({
+  offset = 0,
+  limit = 10,
+  search = "",
+  type = "",
+  sort = "id-asc",
+}: PokemonQueryParams): Promise<{
+  pokemons: Pokemon[];
+  nextOffset: number;
+  hasMore: boolean;
+}> {
   try {
+    const fetchLimit = 150;
+
     const initialRes = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`,
+      `https://pokeapi.co/api/v2/pokemon?limit=${fetchLimit}&offset=${offset}`,
       { cache: "force-cache" }
     );
 
     if (!initialRes.ok) {
-      console.log("Failed to fetch pokemon");
-      return null;
+      throw new Error("Failed to fetch pokemon");
     }
 
     const data = await initialRes.json();
@@ -26,7 +42,6 @@ export async function fetchPokemonBatch(
         } = await fetch(i.url).then((res) => res.json());
 
         const id = pokemonData.id.toString().padStart(3, "0");
-
         const imageUrl = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${id}.png`;
 
         return {
@@ -38,9 +53,58 @@ export async function fetchPokemonBatch(
       }
     );
 
-    return await Promise.all(promises);
+    let pokemons = await Promise.all(promises);
+
+    // Apply search filter if provided
+    if (search) {
+      const searchLower = search.toLowerCase();
+      pokemons = pokemons.filter(
+        (pokemon) =>
+          pokemon.name.toLowerCase().includes(searchLower) ||
+          pokemon.id.toString().includes(searchLower)
+      );
+    }
+
+    // Apply type filter if provided
+    if (type && type !== "all") {
+      pokemons = pokemons.filter((pokemon) =>
+        pokemon.types.some(
+          (t) => t.type.name.toLowerCase() === type.toLowerCase()
+        )
+      );
+    }
+
+    // Apply sorting
+    switch (sort) {
+      case "id-asc":
+        pokemons.sort((a, b) => a.id - b.id);
+        break;
+      case "id-desc":
+        pokemons.sort((a, b) => b.id - a.id);
+        break;
+      case "name-asc":
+        pokemons.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        pokemons.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+
+    // Determine if there are more results
+    const hasMore = data.next !== null;
+    const nextOffset = offset + fetchLimit;
+
+    return {
+      pokemons: pokemons.slice(0, limit),
+      nextOffset,
+      hasMore,
+    };
   } catch (error) {
     console.error("Error fetching Pokémon:", error);
-    return null;
+    return {
+      pokemons: [],
+      nextOffset: offset,
+      hasMore: false,
+    };
   }
 }

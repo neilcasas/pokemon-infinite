@@ -29,11 +29,11 @@ export default function RootLayout({
       <body
         className={cn(
           `${geistSans.variable} ${geistMono.variable} antialiased`,
-          "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center flex flex-col py-10 pb-24" // Added pb-24 for toolbar space
+          "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center flex flex-col"
         )}
       >
         <Providers>
-          <h1 className="text-5xl font-bold mb-10">PokeDex</h1>
+          <h1 className="text-5xl font-bold mt-6 mb-6">PokeDex</h1>
           {children}
         </Providers>
       </body>

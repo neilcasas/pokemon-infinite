@@ -1,14 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchPokemonBatch } from "./api";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { fetchPokemonBatch, PokemonQueryParams } from "./api";
 import { useFilterStore } from "./store";
 import { useMemo } from "react";
 
-// Fetch all Pokémon at once (we'll limit to the first 151 for performance)
 const usePokemonData = () => {
   return useQuery({
     queryKey: ["pokemon-all"],
     queryFn: async () => {
-      const allPokemon = await fetchPokemonBatch(0, 151);
+      const allPokemon = await fetchPokemonBatch(0);
       return allPokemon || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -23,7 +22,7 @@ export const useFilteredPokemon = () => {
   const filteredPokemon = useMemo(() => {
     if (!allPokemon) return [];
 
-    let filtered = [...allPokemon];
+    let filtered = [...(allPokemon?.pokemons || [])];
 
     // Apply search filter
     if (searchQuery) {
@@ -68,4 +67,32 @@ export const useFilteredPokemon = () => {
     isLoading,
     isError,
   };
+};
+
+export const usePokemonInfiniteQuery = () => {
+  const { searchQuery, selectedType, sortOrder } = useFilterStore();
+
+  return useInfiniteQuery({
+    queryKey: [
+      "pokemons",
+      { search: searchQuery, type: selectedType, sort: sortOrder },
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      const params: PokemonQueryParams = {
+        offset: pageParam,
+        limit: 12,
+        search: searchQuery,
+        type: selectedType,
+        sort: sortOrder,
+      };
+
+      const result = await fetchPokemonBatch(params);
+      return result;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore ? lastPage.nextOffset : undefined;
+    },
+    staleTime: 60 * 1000,
+  });
 };

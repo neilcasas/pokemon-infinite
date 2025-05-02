@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFilterStore } from "@/lib/store";
+import { useQueryClient } from "@tanstack/react-query";
 
 // All available Pokémon types
 const pokemonTypes = [
@@ -54,6 +55,8 @@ const sortOptions = [
 
 export const FilterToolbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const queryClient = useQueryClient();
+
   const {
     searchQuery,
     setSearchQuery,
@@ -64,8 +67,33 @@ export const FilterToolbar = () => {
     resetFilters,
   } = useFilterStore();
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // For debouncing search input
+  const [searchInputValue, setSearchInputValue] = useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInputValue !== searchQuery) {
+        setSearchQuery(searchInputValue);
+      }
+    }, 500); // Debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchInputValue, searchQuery, setSearchQuery]);
+
+  const handleChangeType = (value: string) => {
+    setSelectedType(value);
+    queryClient.invalidateQueries({ queryKey: ["pokemons"] });
+  };
+
+  const handleChangeSort = (value: string) => {
+    setSortOrder(value);
+    queryClient.invalidateQueries({ queryKey: ["pokemons"] });
+  };
+
+  const handleResetFilters = () => {
+    resetFilters();
+    setSearchInputValue("");
+    queryClient.invalidateQueries({ queryKey: ["pokemons"] });
   };
 
   const hasActiveFilters =
@@ -95,7 +123,7 @@ export const FilterToolbar = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={resetFilters}
+              onClick={handleResetFilters}
               className="flex items-center gap-1"
             >
               <X size={14} /> Clear
@@ -107,21 +135,19 @@ export const FilterToolbar = () => {
         {isExpanded && (
           <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
-            <form onSubmit={handleSearchSubmit}>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search Pokémon..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </form>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search Pokémon..."
+                className="pl-8"
+                value={searchInputValue}
+                onChange={(e) => setSearchInputValue(e.target.value)}
+              />
+            </div>
 
             {/* Type filter */}
-            <Select value={selectedType} onValueChange={setSelectedType}>
+            <Select value={selectedType} onValueChange={handleChangeType}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
@@ -137,7 +163,7 @@ export const FilterToolbar = () => {
             </Select>
 
             {/* Sort options */}
-            <Select value={sortOrder} onValueChange={setSortOrder}>
+            <Select value={sortOrder} onValueChange={handleChangeSort}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
