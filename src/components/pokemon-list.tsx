@@ -23,7 +23,6 @@ export function PokemonList() {
   const { ref, inView } = useInView();
   const prevFiltersRef = useRef({ searchQuery, selectedType, sortOrder });
 
-  // Handle filters change
   useEffect(() => {
     const prevFilters = prevFiltersRef.current;
     if (
@@ -37,7 +36,6 @@ export function PokemonList() {
     prevFiltersRef.current = { searchQuery, selectedType, sortOrder };
   }, [searchQuery, selectedType, sortOrder, refetch]);
 
-  // Fetch next page when the last item is in view
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -80,8 +78,8 @@ export function PokemonList() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="w-full justify-center items-center flex flex-col">
+      <div className="w-full mx-auto grid grid-cols-1 place-items-center sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {allPokemons.map((pokemon) => (
           <PokemonCard key={pokemon.id} {...pokemon} />
         ))}

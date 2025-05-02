@@ -55,7 +55,6 @@ export async function fetchPokemonBatch({
 
     let pokemons = await Promise.all(promises);
 
-    // Apply search filter if provided
     if (search) {
       const searchLower = search.toLowerCase();
       pokemons = pokemons.filter(
@@ -65,7 +64,6 @@ export async function fetchPokemonBatch({
       );
     }
 
-    // Apply type filter if provided
     if (type && type !== "all") {
       pokemons = pokemons.filter((pokemon) =>
         pokemon.types.some(
@@ -74,7 +72,6 @@ export async function fetchPokemonBatch({
       );
     }
 
-    // Apply sorting
     switch (sort) {
       case "id-asc":
         pokemons.sort((a, b) => a.id - b.id);
