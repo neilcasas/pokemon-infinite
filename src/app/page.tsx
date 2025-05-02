@@ -11,17 +11,19 @@ export default function Home() {
 
   return (
     <>
-      <Suspense
-        key={`${searchQuery}-${selectedType}-${sortOrder}`}
-        fallback={
-          <div className="w-full h-96 flex items-center justify-center">
-            <Spinner />
-          </div>
-        }
-      >
-        <PokemonList />
-      </Suspense>
       <FilterToolbar />
+      <div className="pt-4 pb-10 w-full">
+        <Suspense
+          key={`${searchQuery}-${selectedType}-${sortOrder}`}
+          fallback={
+            <div className="w-full h-96 flex items-center justify-center">
+              <Spinner />
+            </div>
+          }
+        >
+          <PokemonList />
+        </Suspense>
+      </div>
     </>
   );
 }

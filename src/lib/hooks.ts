@@ -1,7 +1,7 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { fetchPokemonBatch, PokemonQueryParams } from "./api";
 import { useFilterStore } from "./store";
-import { useMemo } from "react";
+import { useMemo, useEffect, RefObject } from "react";
 
 const usePokemonData = () => {
   return useQuery({
@@ -96,3 +96,25 @@ export const usePokemonInfiniteQuery = () => {
     staleTime: 60 * 1000,
   });
 };
+
+// Hook to detect clicks outside of the referenced element
+export function useClickAway(ref: RefObject<HTMLElement>, handler: () => void) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      const el = ref?.current;
+      if (!el || el.contains(event.target as Node)) {
+        return;
+      }
+
+      handler();
+    };
+
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [ref, handler]);
+}

@@ -3,13 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CategorySelect } from "@/components/ui/category-select";
 import {
   ChevronDown,
   ChevronUp,
@@ -24,25 +18,25 @@ import { useQueryClient } from "@tanstack/react-query";
 
 // All available Pokémon types
 const pokemonTypes = [
-  "all",
-  "normal",
-  "fire",
-  "water",
-  "electric",
-  "grass",
-  "ice",
-  "fighting",
-  "poison",
-  "ground",
-  "flying",
-  "psychic",
-  "bug",
-  "rock",
-  "ghost",
-  "dragon",
-  "dark",
-  "steel",
-  "fairy",
+  { value: "all", label: "All Types" },
+  { value: "normal", label: "Normal" },
+  { value: "fire", label: "Fire" },
+  { value: "water", label: "Water" },
+  { value: "electric", label: "Electric" },
+  { value: "grass", label: "Grass" },
+  { value: "ice", label: "Ice" },
+  { value: "fighting", label: "Fighting" },
+  { value: "poison", label: "Poison" },
+  { value: "ground", label: "Ground" },
+  { value: "flying", label: "Flying" },
+  { value: "psychic", label: "Psychic" },
+  { value: "bug", label: "Bug" },
+  { value: "rock", label: "Rock" },
+  { value: "ghost", label: "Ghost" },
+  { value: "dragon", label: "Dragon" },
+  { value: "dark", label: "Dark" },
+  { value: "steel", label: "Steel" },
+  { value: "fairy", label: "Fairy" },
 ];
 
 // Sort options
@@ -51,7 +45,15 @@ const sortOptions = [
   { value: "id-desc", label: "ID (Descending)" },
   { value: "name-asc", label: "Name (A-Z)" },
   { value: "name-desc", label: "Name (Z-A)" },
-];
+].map((option) => ({
+  value: option.value,
+  label: (
+    <div className="flex items-center gap-2">
+      <SortAsc size={16} />
+      {option.label}
+    </div>
+  ),
+}));
 
 export const FilterToolbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -102,8 +104,8 @@ export const FilterToolbar = () => {
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg transition-all duration-300 ease-in-out z-40",
-        isExpanded ? "h-auto pb-4" : "h-16"
+        "sticky top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-md transition-all duration-300 ease-in-out z-40",
+        isExpanded ? "pb-4" : ""
       )}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +118,7 @@ export const FilterToolbar = () => {
           >
             <Filter size={16} />
             Filters
-            {isExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </Button>
 
           {hasActiveFilters && (
@@ -133,7 +135,7 @@ export const FilterToolbar = () => {
 
         {/* Expanded filters section */}
         {isExpanded && (
-          <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="py-2 grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -146,38 +148,21 @@ export const FilterToolbar = () => {
               />
             </div>
 
-            {/* Type filter */}
-            <Select value={selectedType} onValueChange={handleChangeType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                {pokemonTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type === "all"
-                      ? "All Types"
-                      : type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Type filter - Using CategorySelect instead */}
+            <CategorySelect
+              options={pokemonTypes}
+              value={selectedType}
+              onChange={handleChangeType}
+              placeholder="Filter by type"
+            />
 
-            {/* Sort options */}
-            <Select value={sortOrder} onValueChange={handleChangeSort}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex items-center gap-2">
-                      <SortAsc size={16} />
-                      {option.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Sort options - Using CategorySelect instead */}
+            <CategorySelect
+              options={sortOptions}
+              value={sortOrder}
+              onChange={handleChangeSort}
+              placeholder="Sort by"
+            />
           </div>
         )}
       </div>
